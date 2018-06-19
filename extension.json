@@ -1,0 +1,18 @@
+{
+	"name": "Hide Metadata Section",
+	"version": "0.1.1",
+	"update": "2018-06-19",
+	"author": "Dror S. [FFS] ([https://www.kolzchut.org.il Kol-Zchut])",
+	"url": "https://github.com/kolzchut/mediawiki-extensions-HideMetadataSection",
+	"description": "Hide a section named \"Metadata\". This is useful to hide the last section on the page",
+	"license-name": "GPL-2.0-or-later",
+	"type": "other",
+	"AutoloadClasses": {
+		"HideMetadataSectionHooks": "HideMetadataSectionHooks.php"
+	},
+	"Hooks": {
+		"ParserSectionCreate": "HideMetadataSectionHooks::onParserSectionCreate",
+		"OutputPageParserOutput": "HideMetadataSectionHooks::onOutputPageParserOutput"
+	},
+	"manifest_version": 2
+}
