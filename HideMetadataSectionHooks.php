@@ -1,6 +1,8 @@
 <?php
 
 class HideMetadataSectionHooks {
+	const METADATA_CONTENT = '<!-- Metadata -->';
+	
 	public static function onOutputPageParserOutput( OutputPage &$out, ParserOutput $parserOutput ) {
 		$parserOutput->mText = preg_replace(
 			'/\<li class="toclevel.*?#MetaData.*?\<\/li>\n/i', '', $parserOutput->mText
@@ -16,9 +18,7 @@ class HideMetadataSectionHooks {
 		};
 
 		if ( stripos( $sectionContent, 'id="metadata"' ) !== false ) {
-			$sectionContent = '';
-
-			return false;
+			$sectionContent = self::METADATA_CONTENT;
 		}
 
 		return true;
