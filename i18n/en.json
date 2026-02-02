@@ -1,0 +1,8 @@
+{
+	"@metadata": {
+		"authors": [
+			"Dror S. [FFS]"
+		]
+	},
+	"hidemetadatasection-desc": "Hide a section named \"Metadata\". This is useful to hide the last section on the page"
+}
