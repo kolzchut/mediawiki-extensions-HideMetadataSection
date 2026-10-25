@@ -18,6 +18,9 @@
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\HideMetadataSection\\": "src/"
 	},
+	"TestAutoloadNamespaces": {
+		"MediaWiki\\Extension\\HideMetadataSection\\Tests\\": "tests/phpunit/"
+	},
 	"HookHandlers": {
 		"HideMetadataSection": {
 			"class": "MediaWiki\\Extension\\HideMetadataSection\\Hooks"

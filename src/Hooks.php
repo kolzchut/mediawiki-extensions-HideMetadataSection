@@ -15,13 +15,15 @@ class Hooks implements
 	 * @inheritDoc
 	 */
 	public function onOutputPageParserOutput( $outputPage, $parserOutput ): void {
-		$text = $parserOutput->getRawText();
-		if ( $text !== null ) {
-			$text = preg_replace(
-				'/\<li class="toclevel.*?#MetaData.*?\<\/li>\n/i', '', $text
-			);
-			$parserOutput->setRawText( $text );
+		// getRawText() throws on a metadata-only ParserOutput, so leave those alone
+		if ( !$parserOutput->hasText() ) {
+			return;
 		}
+
+		$text = preg_replace(
+			'/\<li class="toclevel.*?#MetaData.*?\<\/li>\n/i', '', $parserOutput->getRawText()
+		);
+		$parserOutput->setRawText( $text );
 	}
 
 	/**
