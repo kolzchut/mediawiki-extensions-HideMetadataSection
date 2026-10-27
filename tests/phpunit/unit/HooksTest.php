@@ -3,8 +3,9 @@
 namespace MediaWiki\Extension\HideMetadataSection\Tests\Unit;
 
 use MediaWiki\Extension\HideMetadataSection\Hooks;
-use MediaWiki\Output\OutputPage;
-use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Parser\Parser;
+use MediaWiki\Parser\StripState;
+use MediaWiki\Title\Title;
 use MediaWikiUnitTestCase;
 
 /**
@@ -12,38 +13,43 @@ use MediaWikiUnitTestCase;
  */
 class HooksTest extends MediaWikiUnitTestCase {
 
-	public function testOutputPageParserOutputLeavesTextlessOutputUntouched() {
-		// A metadata-only ParserOutput: getRawText() would throw on it
-		$parserOutput = new ParserOutput();
-		$this->assertFalse( $parserOutput->hasText() );
+	private function runHook( string $text, bool $isSpecialPage = false ): string {
+		$title = $this->createMock( Title::class );
+		$title->method( 'isSpecialPage' )->willReturn( $isSpecialPage );
+		$parser = $this->createMock( Parser::class );
+		$parser->method( 'getTitle' )->willReturn( $title );
 
-		( new Hooks() )->onOutputPageParserOutput(
-			$this->createMock( OutputPage::class ),
-			$parserOutput
+		( new Hooks() )->onParserBeforeInternalParse(
+			$parser,
+			$text,
+			$this->createMock( StripState::class )
 		);
 
-		$this->assertFalse( $parserOutput->hasText() );
+		return $text;
 	}
 
-	public function testOutputPageParserOutputRemovesMetadataTocEntry() {
-		$html = "<ul>\n" .
-			"<li class=\"toclevel-1 tocsection-1\"><a href=\"#Rights\">Rights</a></li>\n" .
-			"<li class=\"toclevel-1 tocsection-2\"><a href=\"#MetaData\">MetaData</a></li>\n" .
-			"<li class=\"toclevel-1 tocsection-3\"><a href=\"#Links\">Links</a></li>\n" .
-			"</ul>";
-		$parserOutput = new ParserOutput( $html );
+	public static function provideMetadataHeadings() {
+		return [
+			'level 2' => [ "Intro\n== Metadata ==\nData", "Intro\n<!-- Metadata -->\nData" ],
+			'any case, no spaces' => [ "Intro\n==METADATA==\nData", "Intro\n<!-- Metadata -->\nData" ],
+			'level 3' => [ "Intro\n=== metadata ===\nData", "Intro\n<!-- Metadata -->\nData" ],
+		];
+	}
 
-		( new Hooks() )->onOutputPageParserOutput(
-			$this->createMock( OutputPage::class ),
-			$parserOutput
-		);
+	/**
+	 * @dataProvider provideMetadataHeadings
+	 */
+	public function testParserBeforeInternalParseHidesMetadataHeading( string $text, string $expected ) {
+		$this->assertSame( $expected, $this->runHook( $text ) );
+	}
 
-		$this->assertSame(
-			"<ul>\n" .
-			"<li class=\"toclevel-1 tocsection-1\"><a href=\"#Rights\">Rights</a></li>\n" .
-			"<li class=\"toclevel-1 tocsection-3\"><a href=\"#Links\">Links</a></li>\n" .
-			"</ul>",
-			$parserOutput->getRawText()
-		);
+	public function testParserBeforeInternalParseKeepsOtherHeadings() {
+		$text = "== Rights ==\nText\n== Metadata in the news ==\nText";
+		$this->assertSame( $text, $this->runHook( $text ) );
+	}
+
+	public function testParserBeforeInternalParseSkipsSpecialPages() {
+		$text = "== Metadata ==\nData";
+		$this->assertSame( $text, $this->runHook( $text, true ) );
 	}
 }
