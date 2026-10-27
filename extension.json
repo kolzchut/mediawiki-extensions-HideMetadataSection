@@ -27,8 +27,7 @@
 		}
 	},
 	"Hooks": {
-		"ParserBeforeInternalParse": "HideMetadataSection",
-		"OutputPageParserOutput": "HideMetadataSection"
+		"ParserBeforeInternalParse": "HideMetadataSection"
 	},
 	"manifest_version": 2
 }

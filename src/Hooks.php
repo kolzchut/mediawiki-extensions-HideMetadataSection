@@ -2,31 +2,16 @@
 
 namespace MediaWiki\Extension\HideMetadataSection;
 
-use MediaWiki\Hook\OutputPageParserOutputHook;
 use MediaWiki\Hook\ParserBeforeInternalParseHook;
 
-class Hooks implements
-	ParserBeforeInternalParseHook,
-	OutputPageParserOutputHook
-{
+class Hooks implements ParserBeforeInternalParseHook {
 	private const METADATA_CONTENT = '<!-- Metadata -->';
 
 	/**
-	 * @inheritDoc
-	 */
-	public function onOutputPageParserOutput( $outputPage, $parserOutput ): void {
-		// getRawText() throws on a metadata-only ParserOutput, so leave those alone
-		if ( !$parserOutput->hasText() ) {
-			return;
-		}
-
-		$text = preg_replace(
-			'/\<li class="toclevel.*?#MetaData.*?\<\/li>\n/i', '', $parserOutput->getRawText()
-		);
-		$parserOutput->setRawText( $text );
-	}
-
-	/**
+	 * Replace a "Metadata" heading with an HTML comment before the parser
+	 * sees it. With no heading left there is no section to show and no
+	 * table-of-contents entry for it.
+	 *
 	 * @inheritDoc
 	 */
 	public function onParserBeforeInternalParse( $parser, &$text, $stripState ): void {
